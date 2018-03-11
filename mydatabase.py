@@ -1,4 +1,4 @@
-from hello import db
+from park_system import db
 
 
 class User(db.Model):
