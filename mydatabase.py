@@ -1,4 +1,4 @@
-from park_system import db
+from __init__ import db
 
 
 class User(db.Model):
@@ -8,8 +8,8 @@ class User(db.Model):
     email = db.Column(db.String(30))
     id_num = db.Column(db.String(20))
     user_type = db.Column(db.String(5))
-    lot_id = db.Column(db.integer)   
-    park_num = db.Column(db.integer)
+    lot_id = db.Column(db.Integer)   
+    park_num = db.Column(db.Integer)
     balance = db.Column(db.Float) 
 
     def __init__(self, unique_num, username, password, email, id_num, user_type,lot_id, park_num, balance):

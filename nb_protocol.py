@@ -43,17 +43,17 @@ class nb_protocol:
               self.unique_num = self.protocol_content[8+len1:8+len1+len2]
               len3 = int(self.protocol_content[10+len1+len2:12+len1+len2],16)*2
               self.lot_id = self.protocol_content[12+len1+len2:12+len1+len2+len3]
-              return {'inout_flag':self.inout_flag, 'unique_num':self.unique_num,'lot_id':self.lot_id }
+              return {'inout_flag':self.inout_flag, 'unique_num':self.unique_num,'lot_id':int(self.lot_id,16) }
     
 
-mydata1 = get_data_field(input1, 'Entrancesonser')
-n1 = nb_protocol(mydata1)
+#mydata1 = get_data_field(input1, 'Entrancesonser')
+#n1 = nb_protocol(mydata1)
 #print (n1.protocol_decode())
 #print (n1.content_decode())
 
 
-mydata2 = get_data_field(ignoreInput, 'Entrancesonser')
-n2 = nb_protocol(mydata2)
+#mydata2 = get_data_field(ignoreInput, 'Entrancesonser')
+#n2 = nb_protocol(mydata2)
 #print(n2.protocol_decode())
 #print(n2.content_decode())
 
