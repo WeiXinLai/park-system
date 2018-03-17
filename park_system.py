@@ -119,13 +119,10 @@ def RepDevCbk():
                  balance = User.query.filter_by(unique_num=c1['unique_num']).first().balance
                  app.logger.info(balance)
                  p1= Park.query.filter_by(lot_id = c1['lot_id'], park_kind ='temp', park_state='available').first()
-                 if p1 is not None:
-                     park_num = p1.park_num
-                     app.logger.info(park_num)
-                 if balance > 0 and park_num is not None:
+                 if balance > 0 and p1 is not None:
                      ret = dict()
                      ret['permit']=True
-                     ret['park_num']=park_num
+                     ret['park_num']=p1.park_num
                      ret['user_type']=user_type
                      ret['balance']=tb_user.balance
                      ret['date_end']=None
@@ -141,17 +138,67 @@ def RepDevCbk():
                      app.logger.info(ret)
             if ret['permit']:
                 service_id = create_service_id()
-                app.logger.info(ret['date_end'])
-                app.logger.info(type(ret['date_end']))
-                app.logger.info(type(datetime.now()))
-                app.logger.info(ret['date_end'])
-                app.logger.info(datetime.now())
+                app.logger.info(ret)
                 i1 = Inout(service_id, c1['lot_id'], ret['park_num'], c1['unique_num'], ret['user_type'], datetime.now(),None,None)
+                app.logger.info(i1)
                 p1 = Park.query.filter_by(lot_id = c1['lot_id'], park_num = ret['park_num']).first()
+                app.logger.info(p1)
+                if ret['user_type']== 'day':
+                    u1 = User.query.filter_by(unique_num = c1['unique_num']).first()
+                    app.logger.info(u1)
+                    u1.lot_id = c1['lot_id']
+                    u1.park_num = ret['park_num']
+                    db.session.add(u1)
+                    db.session.commit()
                 p1.park_state = 'unavailable'
                 db.session.add_all([i1,p1])
                 db.session.commit()
             app.logger.info("successful")         
+        if c1['inout_flag'] == 'out':
+            app.logger.info('out service')
+            tb_user = User.query.filter_by(unique_num=c1['unique_num']).first()
+            app.logger.info(tb_user.user_type)
+            if tb_user.user_type == 'year' or tb_user.user_type == 'month':
+                ret = dict()
+                ret['permit'] = True
+                ret['park_fee']=None
+                ret['user_type']=tb_user.user_type
+                ret['balance'] = tb_user.balance
+                app.logger.info("user_type is year/month, permit")
+            else:
+                time_in = Inout.query.filter_by(unique_num = c1['unique_num'], lot_id = c1['lot_id'],time_out=None).first().time_in
+                half_hour_num = round((datetime.now()-time_in).total_seconds()/1800) #表示多少个半小时
+                park_fee = half_hour_num * 5 #暂定5元半小时
+                if tb_user.balance < park_fee:
+                    ret = dict()
+                    ret['permit'] = False
+                    ret['park_fee']=park_fee
+                    ret['user_type']='day'
+                    ret['balance']=tb_user.balance
+                    app.logger.info('user_type is day but balance is not enough for park_fee so dispermit')
+                else:
+                    ret = dict()
+                    ret['permit'] = True
+                    ret['park_fee']=park_fee
+                    ret['user_type']='day'
+                    ret['balance'] = tb_user.balance
+                    app.logger.info('user_type is day and balance is enough,permit')
+            app.logger.info(ret)
+            if ret['permit'] == True:
+                in1 = Inout.query.filter_by(unique_num = c1['unique_num'], lot_id = c1['lot_id'], time_out=None).first()
+                app.logger.info(in1)
+                in1.time_out = datetime.now()
+                in1.park_fee = ret['park_fee']
+                park1 = Park.query.filter_by(lot_id = tb_user.lot_id, park_num = tb_user.park_num).first()
+                app.logger.info(park1)
+                park1.park_state = 'available'
+                usr2 = User.query.filter_by(unique_num = c1['unique_num']).first()
+                usr2.lot_id = None
+                usr2.park_num = None
+                db.session.add_all([in1,park1,usr2])
+                db.session.commit()
+            app.logger.info('successful')
+                
             #app.logger.info(rsp)
             #iot = EasyIoT('gzhxxxdev01', '!zyhGood3$$')
             #iot.login()
