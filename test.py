@@ -19,10 +19,6 @@ before_month = now - timedelta(days = 31)
 before_day = now - timedelta(days = 1)
 hour = (now-before_day).total_seconds()/3600
 hour = round(hour)
-print(hour)
-a=round(4.6)
-b=round(4.4)
-print(a,b)
 
 
 
