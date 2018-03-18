@@ -59,6 +59,7 @@ def RepDevCbk():
     c1 = n1.content_decode()
     app.logger.info(c1)
     if n1.data_flag and c1 is not None:
+        ret = dict()
         if c1['inout_flag'] == 'in':
             tb_user = User.query.filter_by(unique_num=c1['unique_num'],lot_id=c1['lot_id']).first()
             if tb_user is None:#如果根据唯一编号和停车场id查询不到，说明是临时用户，因为临时用户没有停车场id
@@ -74,7 +75,6 @@ def RepDevCbk():
                  app.logger.info(date_end)
                  app.logger.info(tb_user.balance)
                  if date_end > datetime.now():
-                     ret = dict()
                      ret['permit']=True
                      ret['park_num']= park_num
                      ret['user_type']= user_type
@@ -84,7 +84,6 @@ def RepDevCbk():
                  elif tb_user.balance > 0: #如果年月用户已到期，但用户余额大于0,且该停车场有临时车位也是可以放行    
                      p1 = Park.query.filter_by(lot_id=c1['lot_id'],park_kind='temp',park_state='available').first()
                      if p1 is not None:
-                         ret = dict()
                          ret['permit']=True
                          ret['park_num']=p1.park_num
                          ret['user_type']='day'
@@ -99,7 +98,6 @@ def RepDevCbk():
                          app.logger.info('user type is year/month but exceed the date_end limit, but balance is enough and have temp park_num,so permit')
                          app.logger.info(ret)
                      else: 
-                         ret=dict()
                          ret['permit']=False
                          ret['park_num']=None
                          ret['user_type']='day'
@@ -108,7 +106,6 @@ def RepDevCbk():
                          app.logger.info('user type is year/month but exceed the date_end limit,and balance is enough but temp park is full so dispermit')
                          app.logger.info(ret)
                  else: #车位即过期且账户余额为零
-                     ret = dict()
                      ret['permit']=False
                      ret['park_num']=None
                      ret['user_type']='day'
@@ -120,7 +117,6 @@ def RepDevCbk():
                  app.logger.info(balance)
                  p1= Park.query.filter_by(lot_id = c1['lot_id'], park_kind ='temp', park_state='available').first()
                  if balance > 0 and p1 is not None:
-                     ret = dict()
                      ret['permit']=True
                      ret['park_num']=p1.park_num
                      ret['user_type']=user_type
@@ -128,7 +124,6 @@ def RepDevCbk():
                      ret['date_end']=None
                      app.logger.info("user is day and balance is enough and park is not full so permit")
                  else:
-                     ret=dict()
                      ret['permit']=False
                      ret['park_num']=None
                      ret['balance']=tb_user.balance
@@ -159,7 +154,6 @@ def RepDevCbk():
             tb_user = User.query.filter_by(unique_num=c1['unique_num']).first()
             app.logger.info(tb_user.user_type)
             if tb_user.user_type == 'year' or tb_user.user_type == 'month':
-                ret = dict()
                 ret['permit'] = True
                 ret['park_fee']=None
                 ret['user_type']=tb_user.user_type
@@ -170,14 +164,12 @@ def RepDevCbk():
                 half_hour_num = round((datetime.now()-time_in).total_seconds()/1800) #表示多少个半小时
                 park_fee = half_hour_num * 5 #暂定5元半小时
                 if tb_user.balance < park_fee:
-                    ret = dict()
                     ret['permit'] = False
                     ret['park_fee']=park_fee
                     ret['user_type']='day'
                     ret['balance']=tb_user.balance
                     app.logger.info('user_type is day but balance is not enough for park_fee so dispermit')
                 else:
-                    ret = dict()
                     ret['permit'] = True
                     ret['park_fee']=park_fee
                     ret['user_type']='day'
@@ -198,11 +190,13 @@ def RepDevCbk():
                 db.session.add_all([in1,park1,usr2])
                 db.session.commit()
             app.logger.info('successful')
-                
-            #app.logger.info(rsp)
-            #iot = EasyIoT('gzhxxxdev01', '!zyhGood3$$')
-            #iot.login()
-            #iot.common_method('urt-command', devSerial='863703031721561', method='DataDowncommand',params={'Entrancesonser':'111'})
+        app.logger.info(ret)
+        n1.content_encode(ret)
+        down_protocol = n1.protocol_encode()
+        app.logger.info("down_protocol:"+down_protocol)        
+        iot = EasyIoT('gzhxxxdev01', '!zyhGood3$$')
+        iot.login()
+        iot.common_method('urt-command', devSerial='863703031721561', method='DataDowncommand',params={'Entrancesonser':down_protocol})
     return 'hello wp'
 
 @app.route('/cmd-response-callback',methods=['POST'])
