@@ -1,8 +1,8 @@
 #-*- coding:utf-8 -*-
-from datetime import datetime
+import datetime
 import time
 
-input1 = {"createTime": "2018-02-19 22:29:01", "serviceData": [{"serviceData": {"batteryLevel": 99},"serviceId": "Battery"}, {"serviceData": {"signalStrength": 79}, "serviceId": "Meter"}, {"serviceData": {"Entrancesonser": "01000000000d010100020400036c9003020001"},"serviceId": "Datamessage"}], "lastMessageTime": "2018-03-01 21:55:08", "devSerial": "863703031721561"}
+input1 = {"createTime": "2018-02-19 22:29:01", "serviceData": [{"serviceData": {"batteryLevel": 99},"serviceId": "Battery"}, {"serviceData": {"signalStrength": 79}, "serviceId": "Meter"}, {"serviceData": {"Entrancesonser": "02010000000d01010102041111111103020001"},"serviceId": "Datamessage"}], "lastMessageTime": "2018-03-01 21:55:08", "devSerial": "863703031721561"}
 #ignoreInput = {'devSerial': '863703031721561', 'serviceData': [{'serviceData': {'batteryLevel': 99}, 'serviceId': 'Battery'}, {'serviceData': {'signalStrength': 79}, 'serviceId': 'Meter'}, {'serviceData': {'Entrancesonser': '0100000000040402ffff'}, 'serviceId': 'Datamessage'}], 'lastMessageTime': '2018-03-10 17:18:05', 'createTime': '2018-02-19 22:29:01'}
 
 #input2 = {"createTime": "2018-02-19 22:29:01","serviceData": [{"serviceData": {"batteryLevel": 99},"serviceId": "Battery"},{"serviceData": {"signalStrength": 79}, "serviceId": "Meter"}, {"serviceData": {"Entrancesonser": "02010000000d01010102041111111103020001"}, "serviceId": "Datamessage"}], "lastMessageTime": "2018-03-01 21:55:08", "devSerial": "863703031721561"}
@@ -61,7 +61,10 @@ class nb_protocol:
     def content_encode(self, content_dict):
         if self.inout_flag == 'in':
             permit = content_dict['permit']
-            park_num = int(content_dict['park_num'])
+            if content_dict['park_num'] is not None:
+                park_num = int(content_dict['park_num'])
+            else:
+                park_num = None
             balance = int(content_dict['balance'])
             user_type = content_dict['user_type']
             date_end = content_dict['date_end']
@@ -121,14 +124,22 @@ class nb_protocol:
                 else:
                     date_end_len = str(date_end_len/2).zfill(2)
                 date_end_str = date_end_type+date_end_len+date_end_val
+            else:
+                date_end_str = '05'+'00'   
             print("date_end:"+date_end_str)
             self.content_str = permit_str+park_num_str+balance_str+user_type_str+date_end_str
             return self.content_str
         elif self.inout_flag == 'out':
             permit = content_dict['permit']
             user_type = content_dict['user_type']
-            balance = int(content_dict['balance'])
-            park_fee = content_dict['park_fee'] 
+            if content_dict['balance'] is not None:
+                balance = int(content_dict['balance'])
+            else:
+                balance = None
+            if content_dict['park_fee'] is not None:
+                park_fee = int(content_dict['park_fee'])
+            else:
+                park_fee = None
             if permit == True:
                 permit_str = '01'+'01'+'01'
             else:
@@ -191,15 +202,13 @@ class nb_protocol:
             down_protocol = down_protocol_num + down_protocol_len + down_protocol_content
             return down_protocol
 
-#mydata1 = get_data_field(input1, 'Entrancesonser')
-#n1 = nb_protocol(mydata1)
-#print n1.protocol_decode()
-#print n1.content_decode()
-#content_dict = {'permit':True, 'park_num':1L, 'user_type':'day','balance':int(100.0),'date_end':datetime.now()}
-#print content_dict
-#print "content:"+n1.content_encode(content_dict)
-#print "protocol:"+n1.protocol_encode()
-
+mydata1 = get_data_field(input1, 'Entrancesonser')
+n1 = nb_protocol(mydata1)
+print n1.protocol_decode()
+print n1.content_decode()
+content_dict = {'park_fee': None, 'balance': 0.0, 'user_type': u'year', 'permit': True}
+print "content:"+n1.content_encode(content_dict)
+print "protocol:"+n1.protocol_encode()
 
 #mydata2 = get_data_field(ignoreInput, 'Entrancesonser')
 #n2 = nb_protocol(mydata2)
