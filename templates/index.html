@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>smart parking system</title>
+    <!-- 引入 echarts.js -->
+     <script type="text/javascript" src="http://cdn.static.runoob.com/libs/jquery/1.10.2/jquery.min.js"></script>  
+     <script type="text/javascript" src="http://echarts.baidu.com/dist/echarts.js"></script>
+    <style>
+.transparent_overlay{
+ display: none;
+ position: absolute;
+ top: 0%;
+ left: 0%;
+ width: 100%;
+ height: 100%;
+ background-color: transparent;
+ z-index:1001;
+ -moz-opacity: 0.8;
+ opacity:.80;
+ filter: alpha(opacity=80);
+}
+.white_content {
+ display: none;
+ position: absolute;
+ top: 10%;
+ left: 10%;
+ width: 80%;
+ height: 80%;
+ border: 16px solid lightblue;
+ background-color: white;
+ z-index:1002;
+ overflow: auto;
+}
+.white_content_small {
+ display: none;
+ position: absolute;
+ top: 20%;
+ left: 30%;
+ width: 40%;
+ height: 50%;
+ border: 16px solid lightblue;
+ background-color: white;
+ z-index:1002;
+ overflow: auto;
+}
+   </style>
+   </head>
+<body>
+    <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+
+    <div style="background:#C8C8C8">
+<hr />
+<h1 align=center style="font-size:20px">智能停车场后台管理系统</h1>
+<hr />
+</div>
+
+<h2 align=center style="font-size:16px">{{ lot_id }}号停车场</h2>
+<h2 style = "font-size:16px">车位表</h2>
+
+<div>
+<table border = 1 bordercolor=#336699 style="width:980px;height:200px;">
+   <tr>
+      {% for i in range(7) %}
+          {% if park_dict[i] == "available" %}
+          <td bgcolor="red" onclick="ShowDiv('MyDiv','fade',{{i+1}})">{{ i+1 }}</td>
+          {% else %}
+          <td bgcolor="gray" onclick="ShowDiv('MyDiv','fade',{{i+1}})">{{ i+1 }}</td>
+          {% endif %}
+      {% endfor %}
+   </tr>
+
+   <tr>
+      {% for i in range(7,14) %}
+          {% if park_dict[i] == "available" %}
+          <td bgcolor="red" onclick="ShowDiv('MyDiv','fade',{{i+1}})">{{ i+1 }}</td>
+          {% else %}
+          <td bgcolor="gray" onclick="ShowDiv('MyDiv','fade',{{i+1}})">{{ i+1 }}</td>
+          {% endif %}
+      {% endfor %}
+   </tr>
+
+   <tr>
+      {% for i in range(14,21) %}
+          {% if park_dict[i] == "available" %}
+          <td bgcolor="red" onclick="ShowDiv('MyDiv','fade',{{i+1}})">{{ i+1 }}</td>
+          {% else %}
+          <td bgcolor="gray" onclick="ShowDiv('MyDiv','fade',{{i+1}})">{{ i+1 }}</td>
+          {% endif %}
+      {% endfor %}
+   </tr>
+   
+   <tr>
+      {% for i in range(21,28) %}
+          {% if park_dict[i] == "available" %}
+          <td bgcolor="red" onclick="ShowDiv('MyDiv','fade',{{i+1}})">{{ i+1 }}</td>
+          {% else %}
+          <td bgcolor="gray" onclick="ShowDiv('MyDiv','fade',{{i+1}})">{{ i+1 }}</td>
+          {% endif %}
+      {% endfor %}
+   </tr>
+</table>
+</div>
+
+    <!--弹出层时背景层DIV-->
+    <div id="fade" class="transparent_overlay"> </div>
+    <div id="MyDiv" class="white_content">  
+        <div style="text-align: right; cursor: default; height: 40px;">  
+            <span style="font-size: 16px;" onclick="CloseDiv('MyDiv','fade')">关闭</span>
+            <div id="main1" style="width:400px;height:400px;margin:0 auto"></div>  
+            <div id="main2" style="width:400px;height:400px;margin:0 auto"></div>  
+        </div>    
+    </div>
+
+    <script type="text/javascript">
+    //弹出隐藏层  
+    function ShowDiv(show_div,bg_div,temp){
+     console.log(temp);
+     ShowBar(temp);
+     document.getElementById(show_div).style.display='block';  
+     document.getElementById(bg_div).style.display='block' ;  
+     var bgdiv = document.getElementById(bg_div);  
+     bgdiv.style.width = document.body.scrollWidth;   
+     // bgdiv.style.height = $(document).height();  
+     $("#"+bg_div).height($(document).height()); 
+    };  
+
+   //关闭弹出层  
+   function CloseDiv(show_div,bg_div)  
+   {  
+    document.getElementById(show_div).style.display='none';  
+    document.getElementById(bg_div).style.display='none';  
+   };  
+
+    // 基于准备好的dom，初始化echarts实例
+    var myChart1 = echarts.init(document.getElementById('main1'));
+    var myChart2 = echarts.init(document.getElementById('main2'));
+    function ShowBar( temp )
+   {
+
+    var dataAxis =[]; 
+    var data = [];   
+    var dataAxis2 = []; 
+    var data2 =[];
+   
+
+
+        // 指定图表的配置项和数据
+    var yMax = 24;
+    var dataShadow = [];
+
+    for (var i = 0; i < data.length; i++) {
+        dataShadow.push(yMax);
+    }
+
+var option1 = {
+    title: {
+        text: '车位一天占用时间',
+        subtext: '单位：小时'
+    },
+    tooltip : {
+    },
+    grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        containLabel: true
+    },
+    xAxis: {
+        type : 'category',
+        data: dataAxis,
+        axisTick: {
+            show: false
+        },
+        axisLine: {
+            show: false
+        },
+        z: 10
+    },
+    yAxis: {
+        axisLine: {
+            show: false
+        },
+        axisTick: {
+            show: false
+        },
+        axisLabel: {
+            textStyle: {
+                color: '#999'
+            }
+        }
+    },
+    dataZoom: [
+       {
+           type: 'inside'
+       }
+    ],
+    series: [
+        { // For shadow
+            name:'占用时间',
+            type: 'bar',
+            itemStyle: {
+                normal: {color: 'rgba(0,0,0,0.05)'}
+            },
+            barGap:'-100%',
+            barCategoryGap:'40%',
+            data: dataShadow,
+            animation: false
+        },
+        {
+            name:'占用时间',
+            type: 'bar',
+            itemStyle: {
+                normal: {
+                    color: new echarts.graphic.LinearGradient(
+                        0, 0, 0, 1,
+                        [
+                            {offset: 0, color: '#83bff6'},
+                            {offset: 0.5, color: '#188df0'},
+                            {offset: 1, color: '#188df0'}
+                        ]
+                    )
+                },
+                emphasis: {
+                    color: new echarts.graphic.LinearGradient(
+                        0, 0, 0, 1,
+                        [
+                            {offset: 0, color: '#2378f7'},
+                            {offset: 0.7, color: '#2378f7'},
+                            {offset: 1, color: '#83bff6'}
+                        ]
+                    )
+                }
+            },
+            data: data
+       }
+    ]
+};
+
+var yMax2 = 744;
+var dataShadow2 = [];
+
+for (var i = 0; i < data.length; i++) {
+    dataShadow2.push(yMax2);
+}
+
+var option2 = {
+    title: {
+        text: '车位一个月占用时间',
+        subtext: '单位：小时'
+    },
+   
+    tooltip : {
+    },
+    grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        containLabel: true
+    },
+    xAxis: {
+        type : 'category',
+        data: dataAxis2,
+        axisTick: {
+            show: false
+        },
+        axisLine: {
+            show: false
+        },
+        z: 10
+    },
+    yAxis: {
+        axisLine: {
+            show: false
+        },
+        axisTick: {
+            show: false
+        },
+        axisLabel: {
+            textStyle: {
+                color: '#999'
+            }
+        }
+    },
+    dataZoom: [
+       {
+           type: 'inside'
+       }
+    ],
+    series: [
+        { // For shadow
+            name:'占用时间',
+            type: 'bar',
+            itemStyle: {
+                normal: {color: 'rgba(0,0,0,0.05)'}
+            },
+            barGap:'-100%',
+            barCategoryGap:'40%',
+            data: dataShadow2,
+            animation: false
+        },
+        {
+            name:'占用时间',
+            type: 'bar',
+            itemStyle: {
+                normal: {
+                    color: new echarts.graphic.LinearGradient(
+                        0, 0, 0, 1,
+                        [
+                            {offset: 0, color: '#83bff6'},
+                            {offset: 0.5, color: '#188df0'},
+                            {offset: 1, color: '#188df0'}
+                        ]
+                    )
+                },
+                emphasis: {
+                    color: new echarts.graphic.LinearGradient(
+                        0, 0, 0, 1,
+                        [
+                            {offset: 0, color: '#2378f7'},
+                            {offset: 0.7, color: '#2378f7'},
+                            {offset: 1, color: '#83bff6'}
+                        ]
+                    )
+                }
+            },
+            data: data2
+        }
+    ]
+};
+
+    $.ajax({  
+         type : "get",  
+         async : true,  
+         url : "http://47.106.13.101:83/getdata/"+temp.toString(),
+         data : {},  
+         dataType : "json",        //返回数据形式为json  
+         success : function(result) {  
+             //请求成功时执行该函数内容，result即为服务器返回的json对象  
+             console.log(result);
+             if (result) {  
+                    for(var i in result['date']){  
+                        dataAxis.push(i);
+                        data.push(result['date'][i]);
+                     }  
+                    for(var i in result['month']){  
+                        dataAxis2.push(i);
+                        data2.push(result['month'][i]);
+                      }  
+  
+                 // 使用刚指定的配置项和数据显示图表。
+                  myChart1.setOption(option1);
+                  myChart2.setOption(option2);
+            }  
+        },  
+
+         error : function(errorMsg) {  
+             //请求失败时执行该函数  
+         alert("图表请求数据失败!");  
+         myChart.hideLoading();  
+         }  
+    }) 
+ 
+         console.log(dataAxis);
+         console.log(data);
+         console.log(dataAxis2);
+         console.log(data2);
+       
+}
+   </script>  
+</body>
+</html>

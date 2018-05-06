@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*- 
-from flask import Flask,request
+from flask import Flask,request,render_template
 #import logging
 import simplejson
 #from flask_sqlalchemy import SQLAlchemy
@@ -9,7 +9,10 @@ from mydatabase import User,Park,Inout
 from __init__ import app,db
 from common import create_service_id
 from datetime import datetime
-
+from gpcharts import figure
+from flask import Response 
+import json
+ 
 #app = Flask(__name__)
 #app.debug = True
 #handler = logging.FileHandler('/home/BigWhile/park-system/logs/uwsgi/park.log')
@@ -19,20 +22,29 @@ from datetime import datetime
 #db = SQLAlchemy(app)
 
 
+@app.route('/lot_id/<num>')
+def index(num):
+    park_lst = Park.query.filter_by(lot_id = int(num)).all()
+    park_dict = dict()
+    for park_item in park_lst:
+        park_dict[int(park_item.park_num)] = park_item.park_state
+    app.logger.info(park_dict)
+    park_dict = {1:"available",2:"unavailable",3:"unavailable",4:"available",5:"available",6:"unavailable",7:"unavailable",8:"available",9:"available",10:"unavailable",11:"unavailable",12:"available",13:"available",14:"unavailable",15:"unavailable",16:"available",17:"available",18:"unavailable",19:"unavailable",20:"available",21:"available",22:"unavailable",23:"unavailable",24:"available",25:"available",26:"unavailable",27:"unavailable",28:"available"}
+    return render_template('index.html',lot_id = num, park_dict = park_dict)
+
+
 @app.route('/')
-def index():
-    return '<h1>Hello World!</h1>'
+def user():
+    return render_template('test1.html')
 
-
-@app.route('/user/<name>')
-def user(name):
-    return '<h1>Hello, {}!</h1>'.format(name)
-
-@app.route('/login',methods=['POST','GET'])
-def login():
-    userName = request.form['username']
-    app.logger.info(userName)
-    return '<h1>hello, {}</h1>'.format(userName)
+@app.route('/getdata/<park_num>',methods=['GET','POST'])
+def getdata(park_num):
+    datas = {"date":{"1":10, "2":22,"3":10}, "month":{"1月":220,"2月":559,"3月":660}}
+    content = json.dumps(datas)
+    app.logger.info(content)
+    resp = Response(content)
+    resp.headers['Access-Control-Allow-Origin'] = '*'
+    return resp
 
 @app.route('/dev-batch-reg-result', methods=['POST'])
 def DevBatchRegResult():

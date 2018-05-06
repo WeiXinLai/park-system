@@ -473,8 +473,8 @@ def main_test():
     # 为方便下面接口测试，请不要注释前4步
 
     # 13、注册订阅地址
-    # callback_url = 'http://14.116.207.112:83'
-    # iot.subscribe_service_address(callback_url)
+    callback_url = 'http://47.106.13.101:83'
+    iot.subscribe_service_address(callback_url)
 
     # 14、查询订阅地址
     #iot.query_subscribe_service_address()
@@ -492,17 +492,17 @@ def main_test():
     # rsp = iot.reg_device(device_info)
 
     # 6、批量注册设备
-    devices = []
-    for i in range(3):
-        device_info = {
-            'devSerial': 'Test_'+str(i),
-            'name': 'Test_'+str(i),
-            'deviceType': dev_type,
-            'connectPointId': server_id,
-            'serviceMode': mode
-        }
-        devices.append(device_info)
-    iot.reg_device_batch(devices)
+    #devices = []
+    #for i in range(3):
+    #    device_info = {
+    #        'devSerial': 'Test_'+str(i),
+    #        'name': 'Test_'+str(i),
+    #        'deviceType': dev_type,
+    #        'connectPointId': server_id,
+    #        'serviceMode': mode
+    #    }
+    #    devices.append(device_info)
+    #iot.reg_device_batch(devices)
 
     # 7、更新设备
     #dev_serial = '863703031721561'
@@ -586,7 +586,7 @@ def main_test():
 
     # 设备控制
     #iot.common_method('urt-command', devSerial='', method='', params={})
-    iot.common_method('urt-command', devSerial='863703031721561', method='DataDowncommand', params={'Entrancesonser':'111'})
+    #iot.common_method('urt-command', devSerial='863703031721561', method='DataDowncommand', params={'Entrancesonser':'111'})
 
     # 注册订阅
     # iot.common_method('subscribe-service-address', callbackUrl='')
