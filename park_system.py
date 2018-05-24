@@ -11,7 +11,9 @@ from common import create_service_id
 from datetime import datetime
 from gpcharts import figure
 from flask import Response 
+from collections import OrderedDict
 import json
+import random
  
 #app = Flask(__name__)
 #app.debug = True
@@ -37,9 +39,24 @@ def index(num):
 def user():
     return render_template('test1.html')
 
+def get_random_data():
+    date = dict()
+    month = OrderedDict()
+    for i in range(7):
+        date[str(i+1)] = random.randint(1,24)
+    for i in range(5):
+        month[str(i+1)+'月'] = random.randint(1,744)
+    datas = dict()
+    #sorted(month.items(), key=lambda e:e[0], reverse=True)
+    datas['date'] = date
+    datas['month'] = month
+    return datas
+
+
 @app.route('/getdata/<park_num>',methods=['GET','POST'])
 def getdata(park_num):
-    datas = {"date":{"1":10, "2":22,"3":10}, "month":{"1月":220,"2月":559,"3月":660}}
+    #datas = {"date":{"1":10, "2":22,"3":10}, "month":{"1月":220,"2月":559,"3月":660}}
+    datas = get_random_data()
     content = json.dumps(datas)
     app.logger.info(content)
     resp = Response(content)
@@ -59,6 +76,16 @@ def DevBatchRegResult():
     else:
         app_logger("unreach service")
     return 'hello world'
+
+@app.route('/report-dev-callback01', methods=['POST','GET'])
+def Test01():
+    #rsp = request.get_data()
+    #rsp = simplejson.loads(rsp)
+    #app.logger.info('/report-dev-callback')
+    iot = EasyIoT('gzhxxxdev01', '!zyhGood3$$')
+    iot.login()
+    iot.common_method('urt-command', devSerial='863703031721561', method='command',params={'Park':'010000001201010102010103010004010205045c8fb401'})
+    return "hi buddy!"
 
 @app.route('/report-dev-callback', methods=['POST'])
 def RepDevCbk():
@@ -206,5 +233,6 @@ def CmdRspCbk():
 
 
 if __name__ == '__main__':
+    print get_random_data()
     app.run()
 

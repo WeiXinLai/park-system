@@ -477,7 +477,7 @@ def main_test():
     iot.subscribe_service_address(callback_url)
 
     # 14、查询订阅地址
-    #iot.query_subscribe_service_address()
+    iot.query_subscribe_service_address()
 
     # 5、注册设备
     # devSerial随机生成，deviceType取'第4步'结果的第一个，connectPointId取'第2步'结果的第一个,serviceMode取'第3步'结果的第一个
@@ -523,7 +523,6 @@ def main_test():
     # method = 'DataDowncommand'
     # params = {'Entrancesonser':'allen'}
     # iot.urt_command(dev_serial, method, params)
-
     # 10、查询所有可用设备
     # iot.list_devices()
 
@@ -539,7 +538,7 @@ def main_test():
     # 通过以上的调试，相信你已经对这些接口有了一定的了解，接下来可以使用较为通用的方法调试
 
     # 登录,其他接口的调用请先登录
-    iot.login()
+    #iot.login()
 
     # IOT连接平台
     # iot.common_method('get-iotservers')
@@ -587,7 +586,8 @@ def main_test():
     # 设备控制
     #iot.common_method('urt-command', devSerial='', method='', params={})
     #iot.common_method('urt-command', devSerial='863703031721561', method='DataDowncommand', params={'Entrancesonser':'111'})
-
+    iot.common_method('urt-command', devSerial='863703031721561', method='command',params={'Park':'111'})
+    
     # 注册订阅
     # iot.common_method('subscribe-service-address', callbackUrl='')
 

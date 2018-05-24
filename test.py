@@ -42,11 +42,15 @@ c10 = Park(10,1,10,'temp','available', None,None)
 #c11 = Park(11,1,11,'temp','available',None,None)
 
 
-db.session.add_all([u1,u2,u3,u4,u5,u6,u7,u8,u9,u10,u11,u12,c1,c2,c3,c4,c5,c6,c7,c8,c9,c10])
+#db.session.add_all([u1,u2,u3,u4,u5,u6,u7,u8,u9,u10,u11,u12,c1,c2,c3,c4,c5,c6,c7,c8,c9,c10])
 #db.session.add_all([u13,c10])
-db.session.commit()
+#db.session.commit()
 
-
+park_lst = Park.query.filter_by(lot_id = 1).all()
+park_dict = dict()
+for park_item in park_lst:
+    park_dict[int(park_item.park_num)] = park_item.park_state
+print park_dict
 
 
 #if __name__ == '__main__':
